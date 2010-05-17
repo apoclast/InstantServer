@@ -69,9 +69,9 @@ namespace CF.InstantServer
             pathSettingPairs_.Add("PostgreSQL.BinPath", postgreSQLBinPathBox_);
 
 
-            if (!Directory.Exists(String.Format(@"{0}\Config", Program.StartupPath)))
+            if(!Directory.Exists(String.Format(@"{0}\Config", Program.StartupPath)))
                 Directory.CreateDirectory(String.Format(@"{0}\Config", Program.StartupPath));
-            if (!Directory.Exists(String.Format(@"{0}\Apps", Program.StartupPath)))
+            if(!Directory.Exists(String.Format(@"{0}\Apps", Program.StartupPath)))
                 Directory.CreateDirectory(String.Format(@"{0}\Apps", Program.StartupPath));
             loadSetting();
         }
@@ -79,9 +79,9 @@ namespace CF.InstantServer
         private void loadSetting()
         {
             BinaryFormatter formater = new BinaryFormatter();
-            if (File.Exists(String.Format(@"{0}\Config\sites.bin", Program.StartupPath)))
+            if(File.Exists(String.Format(@"{0}\Config\sites.bin", Program.StartupPath)))
             {
-                using (Stream stm = new FileStream(String.Format(@"{0}\Config\sites.bin", Program.StartupPath), FileMode.Open))
+                using(Stream stm = new FileStream(String.Format(@"{0}\Config\sites.bin", Program.StartupPath), FileMode.Open))
                 {
                     object sites = null;
                     try
@@ -89,27 +89,30 @@ namespace CF.InstantServer
                         sites = formater.Deserialize(stm);
                     }
                     catch { }
-                    if (sites is VirtualSite[])
+                    if(sites is VirtualSite[])
                     {
                         apacheVirtualSiteEditor_.SetVirtualSites((VirtualSite[])sites);
                     }
                 }
             }
-            if (File.Exists(String.Format(@"{0}\Config\path_setting.bin", Program.StartupPath)))
+            if(File.Exists(String.Format(@"{0}\Config\path_setting.bin", Program.StartupPath)))
             {
-                using (Stream stm = new FileStream(String.Format(@"{0}\Config\path_setting.bin", Program.StartupPath), FileMode.Open))
+                using(Stream stm = new FileStream(String.Format(@"{0}\Config\path_setting.bin", Program.StartupPath), FileMode.Open))
                 {
                     object setting = null;
                     try
                     {
                         setting = formater.Deserialize(stm);
                     }
-                    catch { }
-                    if (setting is SortedList<string, string>)
+                    catch
+                    {
+
+                    }
+                    if(setting is SortedList<string, string>)
                     {
                         SortedList<string, string> setting_v = (SortedList<string, string>)setting;
-                        foreach (KeyValuePair<string, TextBox> p in pathSettingPairs_)
-                            if (setting_v.ContainsKey(p.Key) && (File.Exists(setting_v[p.Key]) || Directory.Exists(setting_v[p.Key])))
+                        foreach(KeyValuePair<string, TextBox> p in pathSettingPairs_)
+                            if(setting_v.ContainsKey(p.Key) && (File.Exists(setting_v[p.Key]) || Directory.Exists(setting_v[p.Key])))
                                 p.Value.Text = setting_v[p.Key];
                     }
                 }
@@ -118,37 +121,29 @@ namespace CF.InstantServer
         private void saveSetting()
         {
             BinaryFormatter formatter = new BinaryFormatter();
-            using (Stream stm = new FileStream(String.Format(@"{0}\Config\sites.bin", Program.StartupPath), FileMode.Create))
+            using(Stream stm = new FileStream(String.Format(@"{0}\Config\sites.bin", Program.StartupPath), FileMode.Create))
             {
                 formatter.Serialize(stm, apacheVirtualSiteEditor_.GetVirtualSites());
             }
 
 
-            using (Stream stm = new FileStream(String.Format(@"{0}\Config\path_setting.bin", Program.StartupPath), FileMode.Create))
+            using(Stream stm = new FileStream(String.Format(@"{0}\Config\path_setting.bin", Program.StartupPath), FileMode.Create))
             {
-                object setting = null;
-                try
+                SortedList<string, string> setting = new SortedList<string, string>();
+                foreach(KeyValuePair<string, TextBox> p in pathSettingPairs_)
                 {
-                    setting = formatter.Deserialize(stm);
+                    if(setting.ContainsKey(p.Key))
+                        setting[p.Key] = p.Value.Text;
+                    else
+                        setting.Add(p.Key, p.Value.Text);
                 }
-                catch { }
-                if (setting is SortedList<string, string>)
-                {
-                    SortedList<string, string> setting_v = (SortedList<string, string>)setting;
-                    foreach (KeyValuePair<string, TextBox> p in pathSettingPairs_)
-                    {
-                        if (setting_v.ContainsKey(p.Key))
-                            setting_v[p.Key] = p.Value.Text;
-                        else
-                            setting_v.Add(p.Key, p.Value.Text);
-                    }
-                }
+                formatter.Serialize(stm, setting);
             }
         }
 
         private void appendLog(string txt)
         {
-            if (String.IsNullOrEmpty(txt))
+            if(String.IsNullOrEmpty(txt))
                 return;
             outputBox_.AppendText("[");
             outputBox_.AppendText(DateTime.Now.ToString("dd MMM HH:mm:ssffff"));
@@ -245,7 +240,7 @@ namespace CF.InstantServer
             opener.Multiselect = false;
             opener.Filter = "Apache Execution|httpd.exe";
             opener.ValidateNames = true;
-            if (opener.ShowDialog(this) == System.Windows.Forms.DialogResult.OK)
+            if(opener.ShowDialog(this) == System.Windows.Forms.DialogResult.OK)
             {
                 apacheEXEPathBox_.Text = opener.FileName;
             }
@@ -257,7 +252,7 @@ namespace CF.InstantServer
             opener.Multiselect = false;
             opener.Filter = "Apache Option File|*.conf|Any File|*.*";
             opener.ValidateNames = true;
-            if (opener.ShowDialog(this) == System.Windows.Forms.DialogResult.OK)
+            if(opener.ShowDialog(this) == System.Windows.Forms.DialogResult.OK)
             {
                 apacheConfigPathBox_.Text = opener.FileName;
             }
@@ -268,7 +263,7 @@ namespace CF.InstantServer
             opener.SelectedPath = apacheInitPathBox_.Text;
             opener.RootFolder = Environment.SpecialFolder.MyComputer;
             opener.ShowNewFolderButton = false;
-            if (opener.ShowDialog(this) == System.Windows.Forms.DialogResult.OK)
+            if(opener.ShowDialog(this) == System.Windows.Forms.DialogResult.OK)
             {
                 apacheInitPathBox_.Text = opener.SelectedPath;
             }
@@ -276,7 +271,7 @@ namespace CF.InstantServer
         #endregion
         private void apacheStart()
         {
-            if (!validateApacheConfig())
+            if(!validateApacheConfig())
                 return;
 
             buildApacheConfigFile();
@@ -293,11 +288,13 @@ namespace CF.InstantServer
             start_info.RedirectStandardError = true;
             start_info.RedirectStandardOutput = true;
             start_info.WindowStyle = ProcessWindowStyle.Hidden;
-            if (phpEnableBox_.Checked)
+            start_info.EnvironmentVariables["PATH"] += ";" + phpPathBox_.Text;
+            if(phpEnableBox_.Checked)
             {
-                start_info.EnvironmentVariables["PATH"] += ";" + phpPathBox_.Text;
+                start_info.EnvironmentVariables["PATH"] += ";" + new DirectoryInfo(apacheInitPathBox_.Text).FullName;
             }
-            lock (locker_)
+
+            lock(locker_)
             {
                 apacheProcess_ = new Process();
                 apacheProcess_.StartInfo = start_info;
@@ -315,7 +312,7 @@ namespace CF.InstantServer
             apacheDoStopButton_.Enabled = false;
             ThreadPool.QueueUserWorkItem(delegate(object state)
             {
-                if (!apacheProcess_.HasExited)
+                if(!apacheProcess_.HasExited)
                     ProcessUtility.KillTree(apacheProcess_.Id);
                 apacheProcess_ = null;
             }, null);
@@ -339,7 +336,7 @@ namespace CF.InstantServer
             apacheVirtualSiteEditor_.AppendConfigSegment(bd);
             bd.AppendFormat(@"Include ""{0}""", apacheConfigPathBox_.Text.Replace('\\', '/'));
             bd.AppendLine();
-            if (phpEnableBox_.Checked)
+            if(phpEnableBox_.Checked)
             {
                 appendPHPConfigSegment(bd);
             }
@@ -348,19 +345,19 @@ namespace CF.InstantServer
         private bool validateApacheConfig()
         {
             bool valid = true;
-            if (!Regex.IsMatch(apacheServerNameBox_.Text, @"^(?:(?:[0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\.){3}(?:[0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])$|^(?:(?:[a-zA-Z0-9]|[a-zA-Z0-9][a-zA-Z0-9\-]*[a-zA-Z0-9])\.)*(?:[A-Za-z]|[A-Za-z][A-Za-z0-9\-]*[A-Za-z0-9])\:(\d+)$", RegexOptions.Singleline))
+            if(!Regex.IsMatch(apacheServerNameBox_.Text, @"^(?:(?:[0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\.){3}(?:[0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])$|^(?:(?:[a-zA-Z0-9]|[a-zA-Z0-9][a-zA-Z0-9\-]*[a-zA-Z0-9])\.)*(?:[A-Za-z]|[A-Za-z][A-Za-z0-9\-]*[A-Za-z0-9])\:(\d+)$", RegexOptions.Singleline))
             {
                 apacheServerNameBox_.SelectionStart = 0;
                 apacheServerNameBox_.SelectionLength = apacheServerNameBox_.Text.Length;
                 apacheServerNameGroup_.ForeColor = Color.Red;
                 valid = false;
             }
-            if (apacheVirtualSiteEditor_.GetVirtualSites().Length == 0)
+            if(apacheVirtualSiteEditor_.GetVirtualSites().Length == 0)
             {
                 apacheVirtualSiteGroup_.ForeColor = Color.Red;
                 valid = false;
             }
-            if (!valid)
+            if(!valid)
                 tabControl_.SelectedTab = apachePage_;
             return valid;
         }
@@ -437,7 +434,7 @@ namespace CF.InstantServer
             opener.Multiselect = false;
             opener.Filter = "MySQL Configuration File|*.ini|Any File|*.*";
             opener.ValidateNames = true;
-            if (opener.ShowDialog(this) == System.Windows.Forms.DialogResult.OK)
+            if(opener.ShowDialog(this) == System.Windows.Forms.DialogResult.OK)
             {
                 mySQLINIPathBox_.Text = opener.FileName;
             }
@@ -449,7 +446,7 @@ namespace CF.InstantServer
             opener.Multiselect = false;
             opener.Filter = "MySQL Execution|mysqld.exe|MySQL Debug Execution|mysqld-debug.exe";
             opener.ValidateNames = true;
-            if (opener.ShowDialog(this) == System.Windows.Forms.DialogResult.OK)
+            if(opener.ShowDialog(this) == System.Windows.Forms.DialogResult.OK)
             {
                 mySQLEXEPathBox_.Text = opener.FileName;
             }
@@ -460,7 +457,7 @@ namespace CF.InstantServer
             opener.SelectedPath = mySQLDataPathBox_.Text;
             opener.RootFolder = Environment.SpecialFolder.MyComputer;
             opener.ShowNewFolderButton = false;
-            if (opener.ShowDialog(this) == System.Windows.Forms.DialogResult.OK)
+            if(opener.ShowDialog(this) == System.Windows.Forms.DialogResult.OK)
             {
                 mySQLDataPathBox_.Text = opener.SelectedPath;
             }
@@ -481,7 +478,7 @@ namespace CF.InstantServer
         }
         private void mySQLStart()
         {
-            if (!validateMySQLConfig())
+            if(!validateMySQLConfig())
             {
                 tabControl_.SelectedTab = mySQLPage_;
                 return;
@@ -489,7 +486,7 @@ namespace CF.InstantServer
 
             StringBuilder param_builder = new StringBuilder();
             param_builder.AppendFormat(@" --defaults-file=""{0}""", mySQLINIPathBox_.Text);
-            if (mySQLIPBindBox_.Checked)
+            if(mySQLIPBindBox_.Checked)
                 param_builder.AppendFormat(@" --bind-address={0}", mySQLIP_);
             param_builder.AppendFormat(@" --port={0}", mySQLPortNumberBox_.Value);
             param_builder.AppendFormat(@" --basedir=""{0}""", new FileInfo(mySQLEXEPathBox_.Text).Directory.Parent.FullName);
@@ -508,7 +505,7 @@ namespace CF.InstantServer
 
 
 
-            lock (locker_)
+            lock(locker_)
             {
                 mySQLProcess_ = new Process();
                 mySQLProcess_.ErrorDataReceived += new DataReceivedEventHandler(mySQLProcess_ErrorDataReceived);
@@ -527,7 +524,7 @@ namespace CF.InstantServer
 
             ThreadPool.QueueUserWorkItem(delegate(object state)
             {
-                if (!mySQLProcess_.HasExited)
+                if(!mySQLProcess_.HasExited)
                     ProcessUtility.KillTree(mySQLProcess_.Id);
                 mySQLProcess_ = null;
             }, null);
@@ -535,7 +532,7 @@ namespace CF.InstantServer
         }
         private bool validateMySQLConfig()
         {
-            if (mySQLIPBindBox_.Checked && !IPAddress.TryParse(mySQLIPBox_.Text, out mySQLIP_))
+            if(mySQLIPBindBox_.Checked && !IPAddress.TryParse(mySQLIPBox_.Text, out mySQLIP_))
             {
                 mySQLIPBindBox_.ForeColor = Color.Red;
                 return false;
@@ -560,7 +557,7 @@ namespace CF.InstantServer
             bd.AppendLine(@"AllowOverride None");
             bd.AppendLine(@"</Directory>");
 
-            using (StreamWriter writer = new StreamWriter(String.Format(@"{0}\Config\php.ini", Program.StartupPath.FullName), false))
+            using(StreamWriter writer = new StreamWriter(String.Format(@"{0}\Config\php.ini", Program.StartupPath.FullName), false))
             {
                 writer.WriteLine(File.ReadAllText(phpINIPathBox_.Text));
                 writer.WriteLine(@"extension_dir = ""{0}""", phpExtensionPathBox_.Text);
@@ -626,7 +623,7 @@ namespace CF.InstantServer
             opener.Multiselect = false;
             opener.Filter = "PHP Library|*.dll";
             opener.ValidateNames = true;
-            if (opener.ShowDialog(this) == System.Windows.Forms.DialogResult.OK)
+            if(opener.ShowDialog(this) == System.Windows.Forms.DialogResult.OK)
             {
                 phpDLLPathBox_.Text = opener.FileName;
             }
@@ -638,7 +635,7 @@ namespace CF.InstantServer
             opener.Multiselect = false;
             opener.Filter = "PHP Configuration|php.ini";
             opener.ValidateNames = true;
-            if (opener.ShowDialog(this) == System.Windows.Forms.DialogResult.OK)
+            if(opener.ShowDialog(this) == System.Windows.Forms.DialogResult.OK)
             {
                 phpINIPathBox_.Text = opener.FileName;
             }
@@ -649,7 +646,7 @@ namespace CF.InstantServer
             opener.SelectedPath = phpExtensionPathBox_.Text;
             opener.RootFolder = Environment.SpecialFolder.MyComputer;
             opener.ShowNewFolderButton = false;
-            if (opener.ShowDialog(this) == System.Windows.Forms.DialogResult.OK)
+            if(opener.ShowDialog(this) == System.Windows.Forms.DialogResult.OK)
             {
                 phpExtensionPathBox_.Text = opener.SelectedPath;
             }
@@ -660,7 +657,7 @@ namespace CF.InstantServer
             opener.SelectedPath = phpPathBox_.Text;
             opener.RootFolder = Environment.SpecialFolder.MyComputer;
             opener.ShowNewFolderButton = false;
-            if (opener.ShowDialog(this) == System.Windows.Forms.DialogResult.OK)
+            if(opener.ShowDialog(this) == System.Windows.Forms.DialogResult.OK)
             {
                 phpPathBox_.Text = opener.SelectedPath;
             }
@@ -734,7 +731,7 @@ namespace CF.InstantServer
             opener.SelectedPath = postgreSQLBinPathBox_.Text;
             opener.RootFolder = Environment.SpecialFolder.MyComputer;
             opener.ShowNewFolderButton = false;
-            if (opener.ShowDialog(this) == System.Windows.Forms.DialogResult.OK)
+            if(opener.ShowDialog(this) == System.Windows.Forms.DialogResult.OK)
             {
                 postgreSQLBinPathBox_.Text = opener.SelectedPath;
             }
@@ -745,7 +742,7 @@ namespace CF.InstantServer
             opener.SelectedPath = postgreSQLDataPathBox_.Text;
             opener.RootFolder = Environment.SpecialFolder.MyComputer;
             opener.ShowNewFolderButton = false;
-            if (opener.ShowDialog(this) == System.Windows.Forms.DialogResult.OK)
+            if(opener.ShowDialog(this) == System.Windows.Forms.DialogResult.OK)
             {
                 postgreSQLDataPathBox_.Text = opener.SelectedPath;
             }
@@ -753,7 +750,7 @@ namespace CF.InstantServer
         #endregion
         private void postgreSQLStart()
         {
-            if (!validatePostgreSQLConfig())
+            if(!validatePostgreSQLConfig())
             {
                 tabControl_.SelectedTab = postgreSQLPage_;
                 return;
@@ -775,7 +772,7 @@ namespace CF.InstantServer
             start_info.RedirectStandardOutput = true;
             start_info.WindowStyle = ProcessWindowStyle.Hidden;
 
-            lock (locker_)
+            lock(locker_)
             {
 
                 postgreSQLProcess_ = new Process();
@@ -812,12 +809,12 @@ namespace CF.InstantServer
         }
         private void buildPostgreSQLConfigFile()
         {
-            using (StreamWriter writer = new StreamWriter(String.Format(@"{0}\Config\pg_hba.conf", Program.StartupPath), false))
+            using(StreamWriter writer = new StreamWriter(String.Format(@"{0}\Config\pg_hba.conf", Program.StartupPath), false))
             {
-                foreach (IPAddress add in postgreSQLIPList_)
+                foreach(IPAddress add in postgreSQLIPList_)
                     writer.WriteLine("host\tall\tall\t{0}/{1}\ttrust", add.ToString(), add.GetAddressBytes().Length);
             }
-            using (StreamWriter writer = new StreamWriter(String.Format(@"{0}\Config\postgresql.conf", Program.StartupPath), false))
+            using(StreamWriter writer = new StreamWriter(String.Format(@"{0}\Config\postgresql.conf", Program.StartupPath), false))
             {
                 writer.WriteLine(File.ReadAllText(String.Format(@"{0}\postgresql.conf", postgreSQLDataPathBox_.Text)));
                 writer.WriteLine(@"hba_file='{0}/Config/pg_hba.conf'", Program.StartupPath.FullName.Replace('\\', '/'));
@@ -829,15 +826,15 @@ namespace CF.InstantServer
             postgreSQLIPList_.Clear();
             IPAddress add;
             SortedList<string, IPAddress> added_adds = new SortedList<string, IPAddress>();
-            foreach (string line in lines)
+            foreach(string line in lines)
             {
-                if (IPAddress.TryParse(line, out add) && !added_adds.ContainsKey(add.ToString()))
+                if(IPAddress.TryParse(line, out add) && !added_adds.ContainsKey(add.ToString()))
                 {
                     postgreSQLIPList_.Add(add);
                     added_adds.Add(add.ToString(), add);
                 }
             }
-            if (postgreSQLIPList_.Count == 0)
+            if(postgreSQLIPList_.Count == 0)
             {
                 postgreSQLIPLabel_.ForeColor = Color.Red;
                 return false;
@@ -852,17 +849,17 @@ namespace CF.InstantServer
         }
         private void InstantServer_FormClosing(object sender, FormClosingEventArgs e)
         {
-            if (apacheProcess_ != null)
+            if(apacheProcess_ != null)
             {
                 try { apacheStop(); }
                 catch { }
             }
-            if (mySQLProcess_ != null)
+            if(mySQLProcess_ != null)
             {
                 try { mySQLStop(); }
                 catch { }
             }
-            if (postgreSQLProcess_ != null)
+            if(postgreSQLProcess_ != null)
             {
                 try { postgreSQLStop(); }
                 catch { }
@@ -871,7 +868,7 @@ namespace CF.InstantServer
         }
         private void InstantServer_SizeChanged(object sender, EventArgs e)
         {
-            if (WindowState == FormWindowState.Minimized)
+            if(WindowState == FormWindowState.Minimized)
             {
                 Hide();
             }

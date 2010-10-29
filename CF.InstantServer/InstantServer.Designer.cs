@@ -92,6 +92,10 @@
             this.mySQLIPBox_ = new System.Windows.Forms.TextBox();
             this.mySQLIPBindBox_ = new System.Windows.Forms.CheckBox();
             this.postgreSQLPage_ = new System.Windows.Forms.TabPage();
+            this.postgreSQLPasswordBox_ = new System.Windows.Forms.TextBox();
+            this.postgreSQLPasswordLabel_ = new System.Windows.Forms.Label();
+            this.postgreSQLUserNameLabel_ = new System.Windows.Forms.Label();
+            this.postgreSQLUserNameBox_ = new System.Windows.Forms.TextBox();
             this.postgreSQLIPLabel_ = new System.Windows.Forms.Label();
             this.postgreSQLIPBox_ = new System.Windows.Forms.TextBox();
             this.postgreSQLPortNumberBox_ = new System.Windows.Forms.NumericUpDown();
@@ -849,6 +853,10 @@
             // 
             // postgreSQLPage_
             // 
+            this.postgreSQLPage_.Controls.Add(this.postgreSQLPasswordBox_);
+            this.postgreSQLPage_.Controls.Add(this.postgreSQLPasswordLabel_);
+            this.postgreSQLPage_.Controls.Add(this.postgreSQLUserNameLabel_);
+            this.postgreSQLPage_.Controls.Add(this.postgreSQLUserNameBox_);
             this.postgreSQLPage_.Controls.Add(this.postgreSQLIPLabel_);
             this.postgreSQLPage_.Controls.Add(this.postgreSQLIPBox_);
             this.postgreSQLPage_.Controls.Add(this.postgreSQLPortNumberBox_);
@@ -860,6 +868,38 @@
             this.postgreSQLPage_.TabIndex = 4;
             this.postgreSQLPage_.Text = "PostgreSQL";
             this.postgreSQLPage_.UseVisualStyleBackColor = true;
+            // 
+            // postgreSQLPasswordBox_
+            // 
+            this.postgreSQLPasswordBox_.Location = new System.Drawing.Point(202, 126);
+            this.postgreSQLPasswordBox_.Name = "postgreSQLPasswordBox_";
+            this.postgreSQLPasswordBox_.Size = new System.Drawing.Size(120, 20);
+            this.postgreSQLPasswordBox_.TabIndex = 26;
+            // 
+            // postgreSQLPasswordLabel_
+            // 
+            this.postgreSQLPasswordLabel_.AutoSize = true;
+            this.postgreSQLPasswordLabel_.Location = new System.Drawing.Point(6, 129);
+            this.postgreSQLPasswordLabel_.Name = "postgreSQLPasswordLabel_";
+            this.postgreSQLPasswordLabel_.Size = new System.Drawing.Size(59, 13);
+            this.postgreSQLPasswordLabel_.TabIndex = 25;
+            this.postgreSQLPasswordLabel_.Text = "Password :";
+            // 
+            // postgreSQLUserNameLabel_
+            // 
+            this.postgreSQLUserNameLabel_.AutoSize = true;
+            this.postgreSQLUserNameLabel_.Location = new System.Drawing.Point(6, 103);
+            this.postgreSQLUserNameLabel_.Name = "postgreSQLUserNameLabel_";
+            this.postgreSQLUserNameLabel_.Size = new System.Drawing.Size(63, 13);
+            this.postgreSQLUserNameLabel_.TabIndex = 24;
+            this.postgreSQLUserNameLabel_.Text = "UserName :";
+            // 
+            // postgreSQLUserNameBox_
+            // 
+            this.postgreSQLUserNameBox_.Location = new System.Drawing.Point(202, 100);
+            this.postgreSQLUserNameBox_.Name = "postgreSQLUserNameBox_";
+            this.postgreSQLUserNameBox_.Size = new System.Drawing.Size(120, 20);
+            this.postgreSQLUserNameBox_.TabIndex = 22;
             // 
             // postgreSQLIPLabel_
             // 
@@ -1214,6 +1254,10 @@
         private System.Windows.Forms.Label postgreSQLIPLabel_;
         private System.Windows.Forms.LinkLabel homePageLink_;
         private System.Windows.Forms.Label label1;
+        private System.Windows.Forms.TextBox postgreSQLUserNameBox_;
+        private System.Windows.Forms.Label postgreSQLUserNameLabel_;
+        private System.Windows.Forms.Label postgreSQLPasswordLabel_;
+        private System.Windows.Forms.TextBox postgreSQLPasswordBox_;
     }
 }
 

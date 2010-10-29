@@ -67,7 +67,8 @@ namespace CF.InstantServer
             pathSettingPairs_.Add("PHP.Path", phpPathBox_);
             pathSettingPairs_.Add("PostgreSQL.DataPath", postgreSQLDataPathBox_);
             pathSettingPairs_.Add("PostgreSQL.BinPath", postgreSQLBinPathBox_);
-
+            //pathSettingPairs_.Add("PostgreSQL.UserName", postgreSQLUserNameBox_);
+            //pathSettingPairs_.Add("PostgreSQL.Password", postgreSQLPasswordBox_);
 
             if(!Directory.Exists(String.Format(@"{0}\Config", Program.StartupPath)))
                 Directory.CreateDirectory(String.Format(@"{0}\Config", Program.StartupPath));
@@ -172,7 +173,8 @@ namespace CF.InstantServer
         private void apacheDoStopButton_Click(object sender, EventArgs e)
         {
             //apacheProcess_.CloseMainWindow();
-            ProcessUtility.KillTree(apacheProcess_.Id);
+            //ProcessUtility.KillTree(apacheProcess_.Id);
+            apacheStop(false);
         }
         private void apacheServerNameBox_Enter(object sender, EventArgs e)
         {
@@ -307,15 +309,19 @@ namespace CF.InstantServer
                 appendLog("Apache Started");
             }
         }
-        private void apacheStop()
+        private void apacheStop(bool instant)
         {
             apacheDoStopButton_.Enabled = false;
-            ThreadPool.QueueUserWorkItem(delegate(object state)
+            WaitCallback cb = delegate(object state)
             {
                 if(!apacheProcess_.HasExited)
                     ProcessUtility.KillTree(apacheProcess_.Id);
                 apacheProcess_ = null;
-            }, null);
+            };
+            if(instant)
+                cb(null);
+            else
+                ThreadPool.QueueUserWorkItem(cb, null);
 
 
         }
@@ -474,7 +480,7 @@ namespace CF.InstantServer
         }
         private void mySQLDoStopButton_Click(object sender, EventArgs e)
         {
-            mySQLStop();
+            mySQLStop(false);
         }
         private void mySQLStart()
         {
@@ -518,16 +524,20 @@ namespace CF.InstantServer
                 appendLog("MySQL Started");
             }
         }
-        private void mySQLStop()
+        private void mySQLStop(bool instant)
         {
             mySQLDoStopButton_.Enabled = false;
 
-            ThreadPool.QueueUserWorkItem(delegate(object state)
+            WaitCallback cb = delegate(object state)
             {
                 if(!mySQLProcess_.HasExited)
                     ProcessUtility.KillTree(mySQLProcess_.Id);
                 mySQLProcess_ = null;
-            }, null);
+            };
+            if(instant)
+                cb(null);
+            else
+                ThreadPool.QueueUserWorkItem(cb, null);
 
         }
         private bool validateMySQLConfig()
@@ -694,7 +704,7 @@ namespace CF.InstantServer
         }
         private void postgreSQLDoStopButton_Click(object sender, EventArgs e)
         {
-            postgreSQLStop();
+            postgreSQLStop(false);
         }
         private void postgresqlIPBox_Enter(object sender, EventArgs e)
         {
@@ -771,6 +781,16 @@ namespace CF.InstantServer
             start_info.RedirectStandardError = true;
             start_info.RedirectStandardOutput = true;
             start_info.WindowStyle = ProcessWindowStyle.Hidden;
+            if(!String.IsNullOrEmpty(postgreSQLPasswordBox_.Text) && !String.IsNullOrEmpty(postgreSQLUserNameBox_.Text))
+            {
+                start_info.UserName = postgreSQLUserNameBox_.Text;
+                unsafe
+                {
+                    IntPtr ptr = Marshal.StringToHGlobalUni(postgreSQLPasswordBox_.Text);
+
+                    start_info.Password = new System.Security.SecureString((char*)ptr.ToPointer(), postgreSQLPasswordBox_.Text.Length);
+                }
+            }
 
             lock(locker_)
             {
@@ -786,14 +806,14 @@ namespace CF.InstantServer
                 appendLog("PostgreSQL Started");
             }
         }
-        private void postgreSQLStop()
+        private void postgreSQLStop(bool instant)
         {
             //See
             //http://www.postgresql.org/docs/8.4/static/server-shutdown.html
             //0x1C : SIGQUIT -> Immediate Shutdown
             //0x03 : SIGINT -> Fast Shutdown
             postgreSQLDoStopButton_.Enabled = false;
-            ThreadPool.QueueUserWorkItem(delegate(object state)
+            WaitCallback cb = delegate(object state)
             {
                 ProcessStartInfo start_info = new ProcessStartInfo();
                 start_info.FileName = String.Format(@"{0}\pg_ctl.exe", new DirectoryInfo(postgreSQLBinPathBox_.Text).FullName);
@@ -805,7 +825,12 @@ namespace CF.InstantServer
                 process.Start();
                 process.WaitForExit();
                 postgreSQLProcess_ = null;
-            }, null);
+            };
+
+            if(instant)
+                cb(null);
+            else
+                ThreadPool.QueueUserWorkItem(cb, null);
         }
         private void buildPostgreSQLConfigFile()
         {
@@ -851,18 +876,21 @@ namespace CF.InstantServer
         {
             if(apacheProcess_ != null)
             {
-                try { apacheStop(); }
+                try { apacheStop(true); }
                 catch { }
+                return;
             }
             if(mySQLProcess_ != null)
             {
-                try { mySQLStop(); }
+                try { mySQLStop(true); }
                 catch { }
+                return;
             }
             if(postgreSQLProcess_ != null)
             {
-                try { postgreSQLStop(); }
+                try { postgreSQLStop(true); }
                 catch { }
+                return;
             }
 
         }
